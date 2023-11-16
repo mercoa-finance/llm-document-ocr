@@ -32,6 +32,18 @@ Supports:
 - ❌ DOC
 - ❌ DOCX
 
+## Installation
+
+```bash
+npm i --save llm-document-ocr
+```
+
+```bash
+yarn add llm-document-ocr
+```
+
+Note: If you are deploying via Docker, see the [Dockerfile](https://github.com/mercoa-finance/llm-document-ocr/blob/main/Dockerfile) for an example Alpine base image.
+
 ## Usage
 
 ```ts
