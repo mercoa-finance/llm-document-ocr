@@ -1,12 +1,12 @@
-import Canvas from "canvas";
+const { createCanvas, loadImage } = require("@napi-rs/canvas");
 const sizeOf = require("buffer-image-size");
 
 // crop image whitespace:
 export async function cropImage(image: Buffer | string) {
   const { width, height } = sizeOf(image);
-  const img = await Canvas.loadImage(image);
+  const img = await loadImage(image);
 
-  const canvas = Canvas.createCanvas(width, height);
+  const canvas = createCanvas(width, height);
   const context = canvas.getContext("2d");
 
   context.drawImage(img, 0, 0);
