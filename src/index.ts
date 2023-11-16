@@ -15,8 +15,8 @@ export class DocumentOcr {
     standardFontDataUrl = "https://unpkg.com/pdfjs-dist@3.5.141/standard_fonts/",
   }: {
     apiKey?: string;
-    model: "gpt-4-vision-preview";
-    standardFontDataUrl: string;
+    model?: "gpt-4-vision-preview";
+    standardFontDataUrl?: string;
   }) {
     if (!apiKey) {
       throw new Error("OCR API Key is not defined");
@@ -117,8 +117,6 @@ export class DocumentOcr {
     content = content.replace("```", "");
     content = content.replace(/(?:\r\n|\r|\n)/g, "");
     content = content.replace(/(^,)|(,$)/g, "");
-    const output = dJSON.parse(content ?? "{}");
-
-    return output;
+    return dJSON.parse(content ?? "{}");
   };
 }

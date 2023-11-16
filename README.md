@@ -4,7 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/llm-document-ocr.svg)](https://npmjs.org/package/llm-document-ocr "View this project on NPM")
 [![npm downloads](https://img.shields.io/npm/dm/llm-document-ocr)](https://www.npmjs.com/package/llm-document-ocr)
-[![license](https://img.shields.io/npm/l/llm-document-ocr)](license.md)
+[![license](https://img.shields.io/npm/l/llm-document-ocr)](LICENSE.md)
 
 </div>
 
@@ -23,14 +23,14 @@ LLM Based OCR and Document Parsing for Node.js. Uses GPT4-V for OCR and data ext
 
 Supports:
 
-- [x] PNG
-- [x] WEBP
-- [x] JPEG / JPG
-- [x] GIF
-- [x] PDF
-- [x] Multi-page PDF
-- [ ] DOC
-- [ ] DOCX
+- ✅ PNG
+- ✅ WEBP
+- ✅ JPEG / JPG
+- ✅ GIF
+- ✅ PDF
+- ✅ Multi-page PDF
+- ❌ DOC
+- ❌ DOCX
 
 ## Usage
 
