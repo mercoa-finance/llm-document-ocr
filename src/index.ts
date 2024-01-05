@@ -8,15 +8,18 @@ export class DocumentOcr {
   model: string;
   standardFontDataUrl: string;
   openai: OpenAI;
+  debug: boolean;
 
   constructor({
     apiKey = process.env.OPENAI_API_KEY,
     model = "gpt-4-vision-preview",
     standardFontDataUrl = "https://unpkg.com/pdfjs-dist@3.5.141/standard_fonts/",
+    debug = false,
   }: {
     apiKey?: string;
     model?: "gpt-4-vision-preview";
     standardFontDataUrl?: string;
+    debug?: boolean;
   }) {
     if (!apiKey) {
       throw new Error("OCR API Key is not defined");
@@ -27,6 +30,7 @@ export class DocumentOcr {
     this.openai = new OpenAI({
       apiKey,
     });
+    this.debug = debug;
   }
 
   process = async ({
@@ -46,6 +50,7 @@ export class DocumentOcr {
   }) => {
     // remove the data:image/xxx;base64, prefix if it exists
     if (typeof document === "string" && document.indexOf(",") > 0) {
+      if (this.debug) console.log("Removing data:xxx/xxx;base64, prefix");
       document = document.split(",")[1];
     }
 
@@ -58,6 +63,7 @@ export class DocumentOcr {
 
     // convert pdf to images
     if (mimeType === "application/pdf") {
+      if (this.debug) console.log("Converting PDF to images");
       try {
         const pdfPages = await pdfToImg(buffer, {
           scale: 2,
@@ -66,6 +72,10 @@ export class DocumentOcr {
             standardFontDataUrl: this.standardFontDataUrl,
           },
         });
+        if (this.debug)
+          console.log(
+            `PDF has ${pdfPages.length} pages. Converting to images.`
+          );
         for await (const page of pdfPages) {
           imageData.push(page);
         }
@@ -74,6 +84,15 @@ export class DocumentOcr {
       }
     } else {
       imageData.push(buffer);
+    }
+
+    if (this.debug) {
+      console.log(`Sending ${imageData.length} images to LLM`);
+      for await (const image of imageData) {
+        console.log("  ~~~~ Image ~~~~ ");
+        console.log(image.toString("base64"));
+        console.log("  ~~~~ End Image ~~~~ ");
+      }
     }
 
     // crop images and structure into LLM input format
@@ -89,6 +108,12 @@ export class DocumentOcr {
       })
     );
 
+    if (this.debug) {
+      console.log({
+        prompt,
+      });
+    }
+
     const response = await this.openai.chat.completions.create({
       model: this.model,
       // response_format: {
@@ -100,7 +125,7 @@ export class DocumentOcr {
         {
           role: "system",
           content:
-            "in the images supplied find" +
+            "in the images supplied find " +
             prompt +
             "\nRespond with a valid JSON object with all numbers as a string an no additional text or characters.",
         },
@@ -113,10 +138,24 @@ export class DocumentOcr {
 
     // clean up the response
     let content = response.choices[0].message.content ?? "";
+
+    if (this.debug) {
+      console.log("Raw LLM Response: ");
+      console.log(content);
+    }
+
     content = content.replace("```json", "");
     content = content.replace("```", "");
     content = content.replace(/(?:\r\n|\r|\n)/g, "");
     content = content.replace(/(^,)|(,$)/g, "");
-    return dJSON.parse(content ?? "{}");
+
+    const out = dJSON.parse(content ?? "{}");
+
+    if (this.debug) {
+      console.log("Cleaned LLM Response: ");
+      console.log(JSON.stringify(out, null, 2));
+    }
+
+    return out;
   };
 }
