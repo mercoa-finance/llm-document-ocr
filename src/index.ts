@@ -3,6 +3,13 @@ import { pdf as pdfToImg } from "pdf-to-img";
 import { cropImage } from "./cropImage";
 const dJSON = require("dirty-json");
 
+export enum PageOptions {
+  ALL = "ALL",
+  FIRST = "FIRST",
+  LAST = "LAST",
+  FIRST_AND_LAST = "FIRST_AND_LAST",
+}
+
 export class DocumentOcr {
   apiKey: string;
   model: string;
@@ -37,6 +44,7 @@ export class DocumentOcr {
     document,
     mimeType,
     prompt,
+    pageOptions = PageOptions.ALL,
   }: {
     document: string | Buffer;
     mimeType:
@@ -47,6 +55,7 @@ export class DocumentOcr {
       | "image/gif"
       | "application/pdf";
     prompt: string;
+    pageOptions?: PageOptions;
   }) => {
     // remove the data:image/xxx;base64, prefix if it exists
     if (typeof document === "string" && document.indexOf(",") > 0) {
@@ -72,12 +81,34 @@ export class DocumentOcr {
             standardFontDataUrl: this.standardFontDataUrl,
           },
         });
-        if (this.debug)
+        if (this.debug) {
           console.log(
             `PDF has ${pdfPages.length} pages. Converting to images.`
           );
+        }
+        const numPages = pdfPages.length;
+        let currentPage = 0;
         for await (const page of pdfPages) {
-          imageData.push(page);
+          if (
+            pageOptions === PageOptions.FIRST ||
+            pageOptions === PageOptions.FIRST_AND_LAST
+          ) {
+            if (currentPage === 0) {
+              imageData.push(page);
+            }
+          }
+          if (
+            pageOptions === PageOptions.LAST ||
+            pageOptions === PageOptions.FIRST_AND_LAST
+          ) {
+            if (currentPage === numPages - 1) {
+              imageData.push(page);
+            }
+          }
+          if (pageOptions === PageOptions.ALL) {
+            imageData.push(page);
+          }
+          currentPage++;
         }
       } catch (e) {
         console.error(e);

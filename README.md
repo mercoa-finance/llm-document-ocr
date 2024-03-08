@@ -52,13 +52,14 @@ import { DocumentOcr, prompts } from "llm-document-ocr";
 const documentOcr = new DocumentOcr({
   apiKey: 'YOUR-OPENAI-API-KEY' // required, defaults to process.env.OPENAI_API_KEY
   model: "gpt-4-vision-preview", // optional, defaults to "gpt-4-vision-preview"
-  standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.2.146/standard_fonts/" // optional, defaults to "https://unpkg.com/pdfjs-dist@3.2.146/standard_fonts/". You can use the systems fonts or the fonts under ./node_modules/pdfjs-dist/standard_fonts/ as well.
+  standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.2.146/standard_fonts/", // optional, defaults to "https://unpkg.com/pdfjs-dist@3.2.146/standard_fonts/". You can use the systems fonts or the fonts under ./node_modules/pdfjs-dist/standard_fonts/ as well.
 });
 
 const documentData = await documentOcr.process({
   document: 'JVBERi0xLjMNCiXi48/TDQoNCjEgMCBvYmoNCjw8DQ...', // Base64 String, Base64 URI, or Buffer
   mimeType: 'application/pdf', // mime-type of the document or image
   prompt: 'invoiceStartDate, invoiceEndDate, amount', // system prompt for data extraction. See examples below.
+  pageOptions: 'FIRST_AND_LAST' // optional, defaults to 'ALL'. Determines which page of the PDF will be processed. Available options are 'ALL', 'FIRST_AND_LAST', 'FIRST', 'LAST'.
 })
 ```
 
