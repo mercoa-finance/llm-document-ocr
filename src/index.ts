@@ -13,7 +13,7 @@ export class DocumentOcr {
   constructor({
     apiKey = process.env.OPENAI_API_KEY,
     model = "gpt-4-vision-preview",
-    standardFontDataUrl = "https://unpkg.com/pdfjs-dist@3.5.141/standard_fonts/",
+    standardFontDataUrl = "https://unpkg.com/pdfjs-dist@3.2.146/standard_fonts/",
     debug = false,
   }: {
     apiKey?: string;
