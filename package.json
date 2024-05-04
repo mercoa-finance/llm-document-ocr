@@ -1,6 +1,6 @@
 {
   "name": "llm-document-ocr",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "LLM Based OCR and Document Parsing for Node.js",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -18,10 +18,13 @@
   },
   "keywords": [
     "llm",
+    "gpt",
     "gpt4",
     "ocr",
     "pdf",
-    "image"
+    "image",
+    "claude",
+    "claude3"
   ],
   "author": "Sandeep Dinesh <sandeep@mercoa.com>",
   "license": "MIT",
@@ -36,10 +39,11 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.8",
     "@napi-rs/canvas": "^0.1.44",
     "buffer-image-size": "^0.6.4",
     "dirty-json": "^0.9.2",
-    "openai": "^4.19.0",
+    "openai": "^4.40.2",
     "pdf-to-img": "^2.1.2"
   }
 }
