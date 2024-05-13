@@ -51,12 +51,12 @@ import { DocumentOcr, prompts } from "llm-document-ocr";
 
 const documentOcr = new DocumentOcr({
   apiKey: 'YOUR-OpenAi/Anthropic-API-KEY' // required, defaults to process.env.OPENAI_API_KEY. OpenAI models need an OpenAI API key, Antrhopic models need an Anthropic API key.
-  model: "gpt-4-turbo", // optional, defaults to "gpt-4-turbo". Options are: "gpt-4-turbo", "gpt-4-vision-preview", "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"
+  model: "gpt-4o", // optional, defaults to "gpt-4-turbo". Options are: "gpt-4-turbo", "gpt-4o", "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"
   standardFontDataUrl: "https://unpkg.com/pdfjs-dist@3.2.146/standard_fonts/", // optional, defaults to "https://unpkg.com/pdfjs-dist@3.2.146/standard_fonts/". You can use the systems fonts or the fonts under ./node_modules/pdfjs-dist/standard_fonts/ as well.
 });
 
 const documentData = await documentOcr.process({
-  model: "gpt-4-turbo", // optional, defaults to "gpt-4-turbo". Options are "gpt-4-turbo" or "gpt-4-large"
+  model: "gpt-4o", // optional, defaults to model defined in constructor
   document: 'JVBERi0xLjMNCiXi48/TDQoNCjEgMCBvYmoNCjw8DQ...', // Base64 String, Base64 URI, or Buffer
   mimeType: 'application/pdf', // mime-type of the document or image
   prompt: 'invoiceStartDate, invoiceEndDate, amount', // system prompt for data extraction. See examples below.

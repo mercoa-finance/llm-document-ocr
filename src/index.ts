@@ -1,7 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import { ChatCompletionMessageParam } from "openai/resources";
 import { pdf as pdfToImg } from "pdf-to-img";
 import { cropImage } from "./cropImage";
+import { readPdfText } from "./pdf-text-reader";
 const dJSON = require("dirty-json");
 
 export enum PageOptions {
@@ -26,7 +28,7 @@ export class DocumentOcr {
     apiKey?: string;
     model?:
       | "gpt-4-turbo"
-      | "gpt-4-vision-preview"
+      | "gpt-4o"
       | "claude-3-opus-20240229"
       | "claude-3-sonnet-20240229"
       | "claude-3-haiku-20240307";
@@ -77,8 +79,19 @@ export class DocumentOcr {
     // Array of image data to send to LLM
     const imageData: Array<Buffer> = [];
 
+    let text = "";
+
     // convert pdf to images
     if (mimeType === "application/pdf") {
+      // Try to read the text from the PDF
+      const lines = (await readPdfText(buffer))
+        .flatMap((page) => page.lines.flatMap((line) => line))
+        .map((line) => line.split("\n").join(""))
+        .filter(Boolean);
+      text = lines.join("\n");
+
+      if (this.debug) console.log(text);
+
       if (this.debug) console.log("Converting PDF to images");
       try {
         const pdfPages = await pdfToImg(buffer, {
@@ -138,8 +151,9 @@ export class DocumentOcr {
 
     if (this.model.startsWith("gpt-4")) {
       content = await useOpenAI({
-        model: this.model as "gpt-4-turbo" | "gpt-4-vision-preview",
+        model: this.model as "gpt-4-turbo" | "gpt-4o",
         imageData,
+        text,
         prompt,
         debug: this.debug,
         apiKey: this.apiKey,
@@ -159,6 +173,7 @@ export class DocumentOcr {
       content = await useAnthropic({
         imageData,
         prompt,
+        text,
         debug: this.debug,
         apiKey: this.apiKey,
         mimeType,
@@ -191,15 +206,17 @@ export class DocumentOcr {
 
     async function useOpenAI({
       imageData,
+      text,
       prompt,
       debug,
       model,
       apiKey,
     }: {
       imageData: Array<Buffer>;
+      text?: string;
       prompt: string;
       debug: boolean;
-      model: "gpt-4-turbo" | "gpt-4-vision-preview";
+      model: "gpt-4-turbo" | "gpt-4o";
       apiKey: string;
     }) {
       // crop images and structure into LLM input format
@@ -225,32 +242,47 @@ export class DocumentOcr {
         apiKey,
       });
 
+      const messages: ChatCompletionMessageParam[] = [
+        {
+          role: "system",
+          content:
+            "Find: " +
+            prompt +
+            "\nRespond with a valid JSON object with all numbers as a string an no additional text or characters.",
+        },
+        {
+          role: "user",
+          content: [...imageGPTArray],
+        },
+      ];
+
+      if (text) {
+        messages.push({
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: text,
+            },
+          ],
+        });
+      }
+
       const response = await openai.chat.completions.create({
         model,
         response_format: {
-          type: model === "gpt-4-vision-preview" ? "text" : "json_object",
+          type: "json_object",
         },
         max_tokens: 4096,
         temperature: 0,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Find: " +
-              prompt +
-              "\nRespond with a valid JSON object with all numbers as a string an no additional text or characters.",
-          },
-          {
-            role: "user",
-            content: [...imageGPTArray],
-          },
-        ],
+        messages,
       });
       return response.choices[0].message.content ?? "";
     }
 
     async function useAnthropic({
       imageData,
+      text,
       prompt,
       debug,
       model = "claude-3-haiku-20240307",
@@ -258,6 +290,7 @@ export class DocumentOcr {
       mimeType,
     }: {
       imageData: Array<Buffer>;
+      text?: string;
       prompt: string;
       debug: boolean;
       model?:
