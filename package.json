@@ -44,7 +44,7 @@
     "buffer-image-size": "^0.6.4",
     "dirty-json": "^0.9.2",
     "openai": "^4.40.2",
-    "pdf-to-img": "^2.1.2",
+    "pdf-to-img": "^4.0.0",
     "pdfjs-dist": "3.2.146"
   }
 }
