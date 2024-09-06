@@ -45,6 +45,6 @@
     "dirty-json": "^0.9.2",
     "openai": "^4.40.2",
     "pdf-to-img": "^2.1.2",
-    "pdfjs-dist": "3.2.146"
+    "pdfjs-dist": "4.4.168"
   }
 }
